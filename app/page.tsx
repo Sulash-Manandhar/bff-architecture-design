@@ -1,69 +1,133 @@
-import Image from "next/image";
+import Link from "next/link";
+import { FlowDiagram, type FlowStep } from "@/app/(demo)/flow-diagram";
+
+type Demo = {
+  readonly href: string;
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly summary: string;
+  readonly steps: readonly FlowStep[];
+  readonly tradeoffs: readonly string[];
+};
+
+const DEMOS: readonly Demo[] = [
+  {
+    href: "/server",
+    eyebrow: "Server component",
+    title: "Await the data, then render",
+    summary:
+      "The page component is async. It fetches on the server and sends finished HTML — the browser never runs the fetch.",
+    steps: [
+      {
+        label: "Server component",
+        sublabel: "app/server/page.tsx",
+        detail: "await fetchFeed() — runs before any HTML is sent.",
+      },
+      {
+        label: "Upstream",
+        sublabel: "jsonplaceholder",
+        detail: "/posts · /users · /comments, fetched in parallel.",
+      },
+      {
+        label: "Browser",
+        sublabel: "HTML",
+        detail: "Receives the rendered list. No fetch, no loading state.",
+      },
+    ],
+    tradeoffs: [
+      "Simplest possible path — two files, no client JavaScript",
+      "No loading spinner: the page waits for the data",
+      "Refreshing means re-requesting the page",
+    ],
+  },
+  {
+    href: "/client",
+    eyebrow: "Client component",
+    title: "Fetch after hydration with TanStack Query",
+    summary:
+      "A client component calls a server action through useQuery. The data arrives after the page does, and the result is cached.",
+    steps: [
+      {
+        label: "Client component",
+        sublabel: "useQuery",
+        detail: "Renders skeletons first, then calls the server action.",
+      },
+      {
+        label: "Server action",
+        sublabel: "getFeed()",
+        detail: "Runs on the server. Calls the same fetchFeed().",
+      },
+      {
+        label: "Upstream",
+        sublabel: "jsonplaceholder",
+        detail: "/posts · /users · /comments, fetched in parallel.",
+      },
+    ],
+    tradeoffs: [
+      "Caching, retries and refetch-on-demand come for free",
+      "Needs a loading state, and ships client JavaScript",
+      "The right choice when data changes while the page is open",
+    ],
+  },
+];
+
+function DemoSection({ demo }: { demo: Demo }) {
+  return (
+    <section className="border-t border-border pt-10">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-widest text-accent">{demo.eyebrow}</p>
+          <h2 className="mt-2 text-lg font-semibold tracking-tight">{demo.title}</h2>
+        </div>
+
+        <Link
+          href={demo.href}
+          className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-accent/50 hover:text-accent"
+        >
+          Open {demo.href} →
+        </Link>
+      </div>
+
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{demo.summary}</p>
+
+      <div className="mt-6">
+        <FlowDiagram steps={demo.steps} />
+      </div>
+
+      <ul className="mt-5 flex flex-col gap-1.5">
+        {demo.tradeoffs.map((tradeoff) => (
+          <li key={tradeoff} className="flex gap-2 text-xs text-muted">
+            <span aria-hidden className="text-accent">
+              ·
+            </span>
+            {tradeoff}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12 sm:py-16">
+      <header className="max-w-2xl">
+        <p className="font-mono text-xs uppercase tracking-widest text-accent">Demo</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+          Two ways to fetch the same data
+        </h1>
+        <p className="mt-4 text-sm leading-relaxed text-muted">
+          Both routes render the same feed and share one{" "}
+          <code className="font-mono text-xs">fetchFeed()</code> function. What differs is where the
+          call is made from — and what that costs.
+        </p>
+      </header>
+
+      <div className="mt-12 flex flex-col gap-12">
+        {DEMOS.map((demo) => (
+          <DemoSection key={demo.href} demo={demo} />
+        ))}
+      </div>
+    </main>
   );
 }

@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Two ways to fetch the same data — Next.js demo
 
-## Getting Started
+The same feed, rendered twice, so you can compare the mechanisms side by side. Both routes share one
+`fetchFeed()` function; only the caller differs.
 
-First, run the development server:
+The upstream is [JSONPlaceholder](https://jsonplaceholder.typicode.com), a public fake API.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>. The home page diagrams both flows and links to each.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## The two routes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### `/server` — server component
 
-## Learn More
+```
+Server component ──▶ jsonplaceholder ──▶ Browser receives finished HTML
+await fetchFeed()     /posts /users /comments
+```
 
-To learn more about Next.js, take a look at the following resources:
+An `async` page component awaits the data before rendering. No client JavaScript, no loading state,
+no server action. This is the simplest path.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### `/client` — client component + TanStack Query
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+Client component ──▶ getFeed() server action ──▶ jsonplaceholder
+useQuery                                          /posts /users /comments
+```
 
-## Deploy on Vercel
+The component renders skeletons, then calls a server action through `useQuery`. Costs a loading
+state and some client JavaScript; buys caching, retries and refetch-on-demand.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Where to look
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Role |
+|---|---|
+| [lib/feed.ts](lib/feed.ts) | `fetchFeed()` — the shared fetch and join. Runs on the server in both routes. |
+| [app/server/page.tsx](app/server/page.tsx) | Server component. Awaits `fetchFeed()` directly. |
+| [app/client/page.tsx](app/client/page.tsx) | Renders the client component. |
+| [app/(demo)/feed-panel.tsx](app/\(demo\)/feed-panel.tsx) | `useQuery` plus loading and error states. |
+| [app/actions/feed.ts](app/actions/feed.ts) | `"use server"` wrapper so the browser can call `fetchFeed()`. |
+| [app/page.tsx](app/page.tsx) | The comparison and both flow diagrams. |
+
+## Things to try
+
+- **View source on each route.** `/server` ships the twelve cards in the HTML; `/client` ships
+  skeletons and fills them in after hydration.
+- **Check the build output.** `pnpm build` marks `/server` dynamic (`ƒ`) and `/client` static (`○`).
+- **Throttle the network.** The difference between the two loading experiences becomes obvious.
