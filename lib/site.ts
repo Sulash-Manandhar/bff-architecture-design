@@ -30,9 +30,9 @@ function resolveSiteUrl(): string {
 export const SITE = {
   name: "BFF Demo",
   url: resolveSiteUrl(),
-  title: "Three ways to fetch the same data in Next.js",
+  title: "Next.js data fetching, caching and mutation demos",
   description:
-    "A Backend-for-Frontend demo comparing three Next.js data-fetching strategies — server components, server actions with TanStack Query, and route handlers — against one shared upstream.",
+    "A Backend-for-Frontend demo with six runnable routes: server components, server actions with TanStack Query, route handlers, streaming with use(), caching with use cache, and mutation with server actions.",
   locale: "en_US",
 } as const;
 
@@ -74,6 +74,30 @@ export const ROUTES: readonly RouteMeta[] = [
     title: "Fetch a real endpoint from the browser",
     description:
       "A client component fetches /api/feed over plain HTTP, making the request a normal GET you can watch in DevTools, replay and curl.",
+    priority: 0.8,
+  },
+  {
+    path: "/hybrid",
+    eyebrow: "Server + client",
+    title: "Start on the server, finish on the client",
+    description:
+      "A server component starts the fetch without awaiting it and hands the promise to a client component, which reads it with use() inside a Suspense boundary.",
+    priority: 0.8,
+  },
+  {
+    path: "/caching",
+    eyebrow: "Caching",
+    title: "Pay for the upstream once",
+    description:
+      "A 'use cache' function with a cacheLife profile and a cache tag, so repeat requests skip the upstream entirely until the entry revalidates or is invalidated.",
+    priority: 0.8,
+  },
+  {
+    path: "/mutation",
+    eyebrow: "Mutation",
+    title: "Write through a server action",
+    description:
+      "A form posts to a server action that validates the input, writes, and calls updateTag so the cached list expires immediately and the author sees their own write.",
     priority: 0.8,
   },
 ];

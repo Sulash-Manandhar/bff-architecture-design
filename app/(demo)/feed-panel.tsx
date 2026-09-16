@@ -2,9 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getFeed } from "@/app/actions/feed";
-import { FeedCard, FeedCardSkeleton } from "@/app/(demo)/feed-card";
-
-const SKELETON_COUNT = 6;
+import { FeedGrid, FeedGridSkeleton } from "@/app/(demo)/feed-grid";
+import { FeedError } from "@/app/(demo)/feed-error";
 
 export function FeedPanel() {
   const { data, error, isPending, refetch } = useQuery({
@@ -12,43 +11,9 @@ export function FeedPanel() {
     queryFn: () => getFeed(),
   });
 
-  if (isPending) {
-    return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
-        {Array.from({ length: SKELETON_COUNT }, (_, index) => (
-          <FeedCardSkeleton key={index} />
-        ))}
-      </div>
-    );
-  }
+  if (isPending) return <FeedGridSkeleton />;
 
-  if (error) {
-    return (
-      <div
-        role="alert"
-        className="flex flex-col items-start gap-3 rounded-xl border border-border bg-surface p-6"
-      >
-        <div>
-          <h3 className="text-sm font-semibold">Feed unavailable</h3>
-          <p className="mt-1 text-xs text-muted">Could not load the feed. Please try again.</p>
-        </div>
+  if (error) return <FeedError onRetry={() => void refetch()} />;
 
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:border-accent/50 hover:text-accent"
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {data.map((item) => (
-        <FeedCard key={item.id} item={item} />
-      ))}
-    </div>
-  );
+  return <FeedGrid items={data} />;
 }

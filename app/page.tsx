@@ -98,6 +98,93 @@ const DEMOS: readonly Demo[] = [
       "The right choice when something other than this app also needs the data",
     ],
   },
+  {
+    href: "/hybrid",
+    eyebrow: "Server + client",
+    title: "Start on the server, finish on the client",
+    summary:
+      "The server starts the fetch and hands the unresolved promise to a client component. The shell paints immediately; the feed streams in behind a Suspense boundary.",
+    steps: [
+      {
+        label: "Server component",
+        sublabel: "no await",
+        detail: "Calls fetchFeed() and passes the promise down.",
+      },
+      {
+        label: "Suspense",
+        sublabel: "fallback",
+        detail: "Shell and skeletons ship in the first response.",
+      },
+      {
+        label: "Client component",
+        sublabel: "use(promise)",
+        detail: "Reads the promise as the data streams in.",
+      },
+    ],
+    tradeoffs: [
+      "The upstream trip starts before the first byte — no hydration wait",
+      "Builds as a partial prerender (◐): static shell, streamed body",
+      "The best default when the data is slow but the page should paint fast",
+    ],
+  },
+  {
+    href: "/caching",
+    eyebrow: "Caching",
+    title: "Pay for the upstream once",
+    summary:
+      'A "use cache" function with a cacheLife profile and a cache tag. Repeat requests skip the upstream entirely, and a tag lets a mutation drop the entry on demand.',
+    steps: [
+      {
+        label: "Cached function",
+        sublabel: '"use cache"',
+        detail: "cacheLife('minutes') + cacheTag('feed').",
+      },
+      {
+        label: "Cache entry",
+        sublabel: "1m / 1h",
+        detail: "Stores items and the generation timestamp together.",
+      },
+      {
+        label: "Invalidation",
+        sublabel: "updateTag",
+        detail: "A server action drops the entry immediately.",
+      },
+    ],
+    tradeoffs: [
+      "The upstream is called once per window, not once per visitor",
+      "Data can be stale for as long as the cacheLife profile allows",
+      "updateTag for read-your-own-writes; revalidateTag for background refresh",
+    ],
+  },
+  {
+    href: "/mutation",
+    eyebrow: "Mutation",
+    title: "Write through a server action",
+    summary:
+      "The other half of a BFF: a form posts straight to a server function, which validates, writes, then invalidates the cache tag the list was read through.",
+    steps: [
+      {
+        label: "Form",
+        sublabel: "useActionState",
+        detail: "Posts to the action and renders pending and error state.",
+      },
+      {
+        label: "Server action",
+        sublabel: '"use server"',
+        detail: "Validates the input, then writes.",
+      },
+      {
+        label: "Invalidation",
+        sublabel: "updateTag",
+        detail: "Expires the cached list so the write is visible.",
+      },
+    ],
+    tradeoffs: [
+      "No endpoint to write, and the form works before hydration",
+      "Never trust the payload: the action revalidates every field server-side",
+      "Actions are queued — right for writes, wrong for parallel reads",
+    ],
+  },
 ];
 
 function DemoSection({ demo }: { demo: Demo }) {
@@ -143,12 +230,13 @@ export default function Home() {
       <header className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-widest text-accent">Demo</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Three ways to fetch the same data
+          Six ways to move the same data
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-muted">
-          All three routes render the same feed and share one{" "}
-          <code className="font-mono text-xs">fetchFeed()</code> function. What differs is where the
-          call is made from — and what that costs.
+          Five of these routes render the same feed from one shared{" "}
+          <code className="font-mono text-xs">fetchFeed()</code> function; the sixth writes instead.
+          What differs is where the call is made from, what gets cached — and what each choice
+          costs.
         </p>
       </header>
 

@@ -1,12 +1,16 @@
+import { connection } from "next/server";
 import { fetchFeed } from "@/lib/feed";
 
 /**
  * The only demo whose upstream trip is visible in the browser's Network tab:
  * the client fetches this URL, and this handler calls the same fetchFeed().
  *
- * Route handlers are uncached by default, so no cache opt-out is needed here.
+ * connection() defers to request time. Without it, Cache Components tries to
+ * prerender the handler at build time, where there is no upstream to call.
  */
 export async function GET() {
+  await connection();
+
   try {
     const items = await fetchFeed();
 
