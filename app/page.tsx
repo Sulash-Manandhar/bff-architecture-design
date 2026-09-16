@@ -143,10 +143,10 @@ export default function Home() {
       <header className="max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-widest text-accent">Demo</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          Two ways to fetch the same data
+          Three ways to fetch the same data
         </h1>
         <p className="mt-4 text-sm leading-relaxed text-muted">
-          Both routes render the same feed and share one{" "}
+          All three routes render the same feed and share one{" "}
           <code className="font-mono text-xs">fetchFeed()</code> function. What differs is where the
           call is made from — and what that costs.
         </p>

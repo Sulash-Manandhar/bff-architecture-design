@@ -53,3 +53,28 @@ state and some client JavaScript; buys caching, retries and refetch-on-demand.
   skeletons and fills them in after hydration.
 - **Check the build output.** `pnpm build` marks `/server` dynamic (`ƒ`) and `/client` static (`○`).
 - **Throttle the network.** The difference between the two loading experiences becomes obvious.
+
+## SEO and social previews
+
+Metadata lives in one table, [lib/site.ts](lib/site.ts): every `<title>`, description, canonical URL,
+sitemap entry and OG card reads from it, so a copy change lands everywhere at once.
+
+| Path | Role |
+|---|---|
+| [app/layout.tsx](app/layout.tsx) | Site-wide defaults: title template, Open Graph, Twitter card, robots, theme color. |
+| [lib/metadata.ts](lib/metadata.ts) | `routeMetadata(path)` — per-page title, description and canonical. |
+| [lib/og-image.tsx](lib/og-image.tsx) | The shared 1200×630 card, rendered with `next/og`. |
+| `app/**/opengraph-image.tsx` | One per route, so each page shares with its own card. |
+| [app/robots.ts](app/robots.ts) / [app/sitemap.ts](app/sitemap.ts) | Generated `robots.txt` and `sitemap.xml`. |
+
+Absolute URLs (canonical tags, `og:image`) need a known origin. Set it before deploying:
+
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-domain.example
+```
+
+On Vercel this falls back to the production domain automatically; locally it falls back to
+`http://localhost:3000`.
+
+Preview a card without deploying: `pnpm build && pnpm start`, then open
+<http://localhost:3000/opengraph-image>.

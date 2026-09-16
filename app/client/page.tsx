@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { FeedPanel } from "@/app/(demo)/feed-panel";
+import { routeMetadata } from "@/lib/metadata";
+
+export const metadata = routeMetadata("/client");
 
 export default function ClientFetchPage() {
   return (

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { FeedCard } from "@/app/(demo)/feed-card";
 import { fetchFeed } from "@/lib/feed";
+import { routeMetadata } from "@/lib/metadata";
+
+export const metadata = routeMetadata("/server");
 
 /**
  * No client component, no TanStack Query, no server action. The component is

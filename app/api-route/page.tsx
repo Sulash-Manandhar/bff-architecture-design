@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { FeedFetchPanel } from "@/app/(demo)/feed-fetch-panel";
+import { routeMetadata } from "@/lib/metadata";
+
+export const metadata = routeMetadata("/api-route");
 
 export default function ApiRouteFetchPage() {
   return (
