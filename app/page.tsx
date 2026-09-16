@@ -69,6 +69,35 @@ const DEMOS: readonly Demo[] = [
       "The right choice when data changes while the page is open",
     ],
   },
+  {
+    href: "/api-route",
+    eyebrow: "Route handler",
+    title: "Fetch a real endpoint from the browser",
+    summary:
+      "A client component fetches /api/feed over plain HTTP. The request is a normal GET you can watch in DevTools, replay and curl.",
+    steps: [
+      {
+        label: "Client component",
+        sublabel: "useQuery",
+        detail: 'Renders skeletons first, then fetch("/api/feed").',
+      },
+      {
+        label: "Route handler",
+        sublabel: "app/api/feed/route.ts",
+        detail: "GET returns JSON. Calls the same fetchFeed().",
+      },
+      {
+        label: "Upstream",
+        sublabel: "jsonplaceholder",
+        detail: "/posts · /users · /comments, fetched in parallel.",
+      },
+    ],
+    tradeoffs: [
+      "A visible, curl-able GET — the easiest of the three to debug",
+      "Types are not shared across the wire: the response needs validating",
+      "The right choice when something other than this app also needs the data",
+    ],
+  },
 ];
 
 function DemoSection({ demo }: { demo: Demo }) {
