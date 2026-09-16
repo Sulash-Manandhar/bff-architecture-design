@@ -8,6 +8,7 @@
   --border: #e4e6eb;
   --muted: #6b7280;
   --accent: #4f46e5;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -22,8 +23,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/*
+ * Three states, not two: an explicit choice stamps data-theme on <html>, while
+ * the default ("system") stamps nothing and leaves prefers-color-scheme in
+ * charge. The :not() guard is what lets an explicit light choice beat a dark OS.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --background: #0a0a0a;
     --foreground: #ededed;
     --surface: #121214;
@@ -31,6 +37,35 @@
     --border: #26262b;
     --muted: #9aa0a6;
     --accent: #a5b4fc;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --surface: #121214;
+  --surface-muted: #17171a;
+  --border: #26262b;
+  --muted: #9aa0a6;
+  --accent: #a5b4fc;
+  color-scheme: dark;
+}
+
+/*
+ * Tailwind's stock `dark:` variant only reads prefers-color-scheme, which would
+ * ignore the toggle. Redefining it to match the same three states keeps
+ * utilities like `dark:via-white/[0.06]` in step with the tokens above.
+ */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) & {
+      @slot;
+    }
+  }
+
+  :root[data-theme="dark"] & {
+    @slot;
   }
 }
 
